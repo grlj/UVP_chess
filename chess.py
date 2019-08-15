@@ -45,7 +45,7 @@ class Moves:
         for i in range(-1, 2):
             for j in range(-1, 2):
                 temp_square = chr(ord(square[0]) + j) + str(int(square[1]) + i)
-                if temp_square in self.playboard_squares and playboard[temp_square] and temp_square != square:
+                if temp_square in self.playboard_squares and playboard.board[temp_square] and temp_square != square:
                     possible_squares.append(temp_square)
         return possible_squares
     
@@ -64,7 +64,7 @@ class Moves:
         while i + int(test_square[1]) < 8: 
             temp_square = test_square[0] + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i += 1
             else:
                 break
@@ -73,7 +73,7 @@ class Moves:
         while i + int(test_square[1]) > 0: 
             temp_square = test_square[0] + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i -= 1
             else:
                 break
@@ -82,7 +82,7 @@ class Moves:
         while i + ord(test_square[0]) - 97 < 8: 
             temp_square =  chr(ord(test_square[0]) + i) + test_square[1]
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i += 1
             else:
                 break
@@ -91,7 +91,7 @@ class Moves:
         while i + ord(test_square[0]) - 97 > 0: 
             temp_square = chr(ord(test_square[0]) + i) + test_square[1]
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i -= 1
             else:
                 break
@@ -105,7 +105,7 @@ class Moves:
         while i + int(test_square[1]) < 8 and i + ord(test_square[0]) - 97 < 8:
             temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i += 1
             else:
                 break
@@ -114,7 +114,7 @@ class Moves:
         while i + int(test_square[1]) > 0 and i + ord(test_square[0]) - 97 > 0:
             temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i -= 1
             else:
                 break
@@ -123,7 +123,7 @@ class Moves:
         while i + int(test_square[1]) < 8 and - i + ord(test_square[0]) - 97 > 0:
             temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i += 1
             else:
                 break
@@ -132,7 +132,7 @@ class Moves:
         while - i + int(test_square[1]) > 0 and i + ord(test_square[0]) - 97 < 8:
             temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
             if self.check_if_ok(temp_square, test_square):
-                possible_squares.append[test_square]
+                possible_squares.append(test_square)
                 i += 1
             else:
                 break
@@ -153,8 +153,36 @@ class Moves:
             
         return possible_squares
 
-    def P(self, square)
+    def P(self, test_square):
+        possible_squares = []
+        if playboard.board[test_square][0] == 'w':
+            temp_square1 = test_square[0] + str(int(test_square[1]) + 1)
+            temp_square2 = test_square[0] + str(int(test_square[1]) + 2)
+            if not playboard.board[temp_square1]:
+                possible_squares.append(temp_square1)
+            if not playboard.board[temp_square2] and test_square[1] == '2':
+                possible_squares.append(temp_square2)
+            temp_square1 = chr(ord(test_square[0]) - 1) + str(int(test_square[1]) + 1)
+            temp_square2 = chr(ord(test_square[0]) + 1) + str(int(test_square[1]) + 1)
+            if temp_square1 in self.playboard_squares and playboard.board[temp_square1] and playboard.board[temp_square1][0] == 'b':
+                possible_squares.append(temp_square1)
+            if temp_square2 in self.playboard_squares and playboard.board[temp_square2] and playboard.board[temp_square2][0] == 'b':
+                possible_squares.append(temp_square2)
+        else:
+            temp_square1 = test_square[0] + str(int(test_square[1]) - 1)
+            temp_square2 = test_square[0] + str(int(test_square[1]) - 2)
+            if not playboard.board[temp_square1]:
+                possible_squares.append(temp_square1)
+            if not playboard.board[temp_square2] and test_square[1] == '7':
+                possible_squares.append(temp_square2)
+            temp_square1 = chr(ord(test_square[0]) - 1) + str(int(test_square[1]) - 1)
+            temp_square2 = chr(ord(test_square[0]) + 1) + str(int(test_square[1]) - 1)
+            if temp_square1 in self.playboard_squares and playboard.board[temp_square1] and playboard.board[temp_square1][0] == 'b':
+                possible_squares.append(temp_square1)
+            if temp_square2 in self.playboard_squares and playboard.board[temp_square2] and playboard.board[temp_square2][0] == 'b':
+                possible_squares.append(temp_square2)
 
+        return possible_squares
 
 class Queen:
     def __init__(self, colour, square, possible_squares):
