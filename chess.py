@@ -28,7 +28,7 @@ class Board:
                 squares_with_pieces.append(i)
         return squares_with_pieces
                 
-    def check_for_move(self, start_square, end_square):
+    def check_for_move(self, start_square, end_square): #simulates desired move and checks for checks returns board as it was given
         temp_figure = self.board[start_square]
         if not temp_figure:
             return False #TODO error message
@@ -50,7 +50,7 @@ class Board:
             self.board[end_square] = target
             return True
         
-    def move(self, start_square, end_square):
+    def move(self, start_square, end_square): #preforms the move + castling + promotion + en passant
         temp_figure = self.board[start_square]
         if temp_figure.kind == 'K' and start_square == 'e1' and end_square == 'c1':
             if self.check_for_move('e1', 'd1') and self.check_for_move('e1', 'c1') and not self.check_if_check('e1'):
@@ -102,12 +102,40 @@ class Board:
             self.board[start_square] = False
             temp_figure.move_log.append(end_square + '=' + desired_promotion)
             self.game_log.append(end_square + '=' + desired_promotion)
+        elif temp_figure.kind == 'P' and start_square[1] == '5' and temp_figure.colour == 'w' and not self.board[end_square] and (end_square[0] == chr(ord(start_square[0]) + 1) or end_square[0] == chr(ord(start_square[0]) - 1)):
+            if self.game_log == 'P' + chr(ord(start_square[0]) + 1) + '5' and len(self.board[chr(ord(start_square[0]) + 1) + '5'].move_log) == 1:
+                self.board[end_square] = temp_figure
+                self.board[start_square] = False
+                self.board[chr(ord(start_square[0]) + 1) + '5'] = False
+                temp_figure.move_log.append(end_square)
+                self.game_log.append(temp_figure.kind + end_square)
+            if self.game_log == 'P' + chr(ord(start_square[0]) - 1) + '5' and len(self.board[chr(ord(start_square[0]) - 1) + '5'].move_log) == 1:
+                self.board[end_square] = temp_figure
+                self.board[start_square] = False
+                self.board[chr(ord(start_square[0]) - 1) + '5'] = False
+                temp_figure.move_log.append(end_square)
+                self.game_log.append(temp_figure.kind + end_square)
+        elif temp_figure.kind == 'P' and start_square[1] == '4' and temp_figure.colour == 'b' and not self.board[end_square] and (end_square[0] == chr(ord(start_square[0]) + 1) or end_square[0] == chr(ord(start_square[0]) - 1)):
+            if self.game_log == 'P' + chr(ord(start_square[0]) + 1) + '4' and len(self.board[chr(ord(start_square[0]) + 1) + '4'].move_log) == 1:
+                self.board[end_square] = temp_figure
+                self.board[start_square] = False
+                self.board[chr(ord(start_square[0]) + 1) + '4'] = False
+                temp_figure.move_log.append(end_square)
+                self.game_log.append(temp_figure.kind + end_square)
+            if self.game_log == 'P' + chr(ord(start_square[0]) - 1) + '4' and len(self.board[chr(ord(start_square[0]) - 1) + '4'].move_log) == 1:
+                self.board[end_square] = temp_figure
+                self.board[start_square] = False
+                self.board[chr(ord(start_square[0]) - 1) + '4'] = False
+                temp_figure.move_log.append(end_square)
+                self.game_log.append(temp_figure.kind + end_square)
         elif self.check_for_move(start_square, end_square):
             self.board[end_square] = temp_figure
             self.board[start_square] = False
             temp_figure.move_log.append(end_square)
             self.game_log.append(temp_figure.kind + end_square)
             return True
+        else:
+            return False
 
         
 
