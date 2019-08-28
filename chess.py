@@ -2,14 +2,14 @@ class Board:
 
     def __init__(self):
         self.game_log = []
-        self.board = {'a1': False, 'a2': False, 'a3': False, 'a4': False, 'a5': False, 'a6': False, 'a7': False, 'a8': False, 
-        'b1': False, 'b2': False, 'b3': False, 'b4': False, 'b5': False, 'b6': False, 'b7': False, 'b8': False, 
-        'c1': False, 'c2': False, 'c3': False, 'c4': False, 'c5': False, 'c6': False, 'c7': False, 'c8': False, 
-        'd1': False, 'd2': False, 'd3': False, 'd4': False, 'd5': False, 'd6': False, 'd7': False, 'd8': False, 
-        'e1': False, 'e2': False, 'e3': False, 'e4': False, 'e5': False, 'e6': False, 'e7': False, 'e8': False, 
-        'f1': False, 'f2': False, 'f3': False, 'f4': False, 'f5': False, 'f6': False, 'f7': False, 'f8': False, 
-        'g1': False, 'g2': False, 'g3': False, 'g4': False, 'g5': False, 'g6': False, 'g7': False, 'g8': False, 
-        'h1': False, 'h2': False, 'h3': False, 'h4': False, 'h5': False, 'h6': False, 'h7': False, 'h8': False}
+        self.board = {'a8': False, 'b8': False, 'c8': False, 'd8': False, 'e8': False, 'f8': False, 'g8': False, 'h8': False, 
+        'a7': False, 'b7': False, 'c7': False, 'd7': False, 'e7': False, 'f7': False, 'g7': False, 'h7': False, 
+        'a6': False, 'b6': False, 'c6': False, 'd6': False, 'e6': False, 'f6': False, 'g6': False, 'h6': False,
+        'a5': False, 'b5': False, 'c5': False, 'd5': False, 'e5': False, 'f5': False, 'g5': False, 'h5': False,
+        'a4': False, 'b4': False, 'c4': False, 'd4': False, 'e4': False, 'f4': False, 'g4': False, 'h4': False, 
+        'a3': False, 'b3': False, 'c3': False, 'd3': False, 'e3': False, 'f3': False, 'g3': False, 'h3': False, 
+        'a2': False, 'b2': False, 'c2': False, 'd2': False, 'e2': False, 'f2': False, 'g2': False, 'h2': False,
+        'a1': False, 'b1': False, 'c1': False, 'd1': False, 'e1': False, 'f1': False, 'g1': False, 'h1': False}
    
 
     def check_if_check(self, K_square):
@@ -343,6 +343,24 @@ class Piece:
         self.colour = colour
         self.possible_squares = possible_squares
         self.move_log = []
+
+    def encode(self):
+        i = 0
+        if self.kind == 'K':
+            i += 12
+        elif self.kind == 'Q':
+            i += 13
+        elif self.kind == 'R':
+            i += 14
+        elif self.kind == 'B':
+            i += 15
+        elif self.kind == 'N':
+            i += 16
+        elif self.kind == 'P':
+            i += 17
+        if self.colour == 'b':
+            i += 6
+        return int('98' + str(i))    
 
 gameboard = Board()
 wN = Piece('K', 'b', [])
