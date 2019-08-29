@@ -3,6 +3,8 @@
 import bottle
 from chess import Board, Moves, Piece
 
+bottle.TEMPLATE_PATH.insert(0, 'views')
+
 gameboard = Board()
 bK = Piece('K', 'b', [])
 bQ = Piece('Q', 'b', [])
@@ -75,10 +77,23 @@ gameboard.board['h2'] = wP8
 def print_board():
     return bottle.template('test_web.tpl', playboard = gameboard)
 
+@bottle.get('/move_end')
+def print_board1():
+    return bottle.template('test_web_end.tpl', playboard = gameboard)
+
+start_sq = ''
+end_sq = ''
+
+@bottle.post('/move_start')
+def move_start():
+    global start_sq
+    start_sq = bottle.request.forms["i"]
+    bottle.redirect('/move_end')
+
 @bottle.post('/move')
-def move():
-    start_sq = bottle.request.forms["start"]
-    end_sq = bottle.request.forms["end"]
+def move_end():
+    global end_sq
+    end_sq = bottle.request.forms["i"]
     gameboard.move(start_sq, end_sq)
     bottle.redirect('/')
 

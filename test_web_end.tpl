@@ -7,7 +7,7 @@
 
 <body>
     <div class="chessboard">
-    <form action="/move_start" method="POST">
+    <form action="/move" method="POST">
     <% 
     for i in playboard.board:
         if (ord(i[0]) + int(i[1]) - 1)%2:
@@ -17,7 +17,7 @@
         end
         if playboard.board[i]: 
     %>
-        <div class="{{square_colour}}">&#{{playboard.board[i].encode()}};<input class="asdf" name="i" type="submit" value="{{i}}"></input></div>
+        <div class="{{square_colour}}">&#{{playboard.board[i].encode()}}; <input class="asdf" name="i" type="submit" value="{{i}}"/></div>
     %else:
         <div class="{{square_colour}}"><input class="asdf" name="i" type="submit" value="{{i}}"/></div>
     %end
