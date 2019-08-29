@@ -81,6 +81,11 @@ def print_board():
 def print_board1():
     return bottle.template('test_web_end.tpl', playboard = gameboard)
 
+@bottle.get('/promote')
+def print_board2():
+    return bottle.template('test_web_promotion.tpl')
+
+
 start_sq = ''
 end_sq = ''
 
@@ -94,7 +99,19 @@ def move_start():
 def move_end():
     global end_sq
     end_sq = bottle.request.forms["i"]
-    gameboard.move(start_sq, end_sq)
+    move = gameboard.move(start_sq, end_sq)
+    if move == 'Promotion':
+        print('jaaaj')
+        bottle.redirect('/promote')
+    else:
+        bottle.redirect('/')
+
+@bottle.post('/promote')
+def promote():
+    kind = str(bottle.request.forms["i"])
+    print(kind)
+    gameboard.promotion(kind, start_sq, end_sq)
     bottle.redirect('/')
+
 
 bottle.run(debug=True, reloader=True)
