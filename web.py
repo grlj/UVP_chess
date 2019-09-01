@@ -47,7 +47,6 @@ def move_end():
     end_sq = bottle.request.forms["i"]
     move = gameboard.move(start_sq, end_sq)
     if move == 'White Promotion' or move == 'Black Promotion':  # needs extra player input
-        print('jaaaj')
         bottle.redirect('/promote')
     else:
         bottle.redirect('/')
