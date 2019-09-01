@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="UTF-8"> 
-<title>Chessboard using Pure CSS and HTML</title>
+<title>Šah</title>
     <style type="text/css">
     .chessboard {
         width: 640px;
@@ -10,28 +10,28 @@
         border: 25px solid #333;
     }
     .asdf {
-    background: none;
-    color: #ffffff00;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    outline: inherit;
-    position: absolute;
-    left: 0; 
-    top: 0;
-    width: 100%;
-    height:100%;
+        background: none;
+        color: #ffffff00;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+        position: absolute;
+        left: 0; 
+        top: 0;
+        width: 100%;
+        height:100%;
     }
     .black {
         float: left;
         width: 80px;
         height: 80px;
         background-color: #999;
-            font-size:50px;
-        text-align:center;
+        font-size: 50px;
+        text-align: center;
         display: table-cell;
-        vertical-align:middle;
+        vertical-align: middle;
         position: relative;
     }
     .white {
@@ -39,11 +39,22 @@
         width: 80px;
         height: 80px;
         background-color: #fff;
-        font-size:50px;
-        text-align:center;
+        font-size: 50px;
+        text-align: center;
         display: table-cell;
-        vertical-align:middle;
+        vertical-align: middle;
         position: relative;
+    }
+    .button {
+        background-color: #999;
+        font-size: 20px;
+        text-align: center;
+        color: #000;
+        padding: 12px;
+        border: 4px solid #333;
+        float: left;
+        margin-left:20px;
+        margin-bottom: 20px;
     }
     </style>
 </head>
@@ -67,6 +78,15 @@
     %end
     </form>
     </div>
+
+<form action="/game_log" method="POST">
+    <input class="button" type="submit" value="Prikaz potez">
+</form>
+
+<form action="/new_game" method="POST">
+    <input class="button" type="submit" value="Nova igra">
+</form>
+
 
 </body>
 </html>
