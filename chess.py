@@ -68,143 +68,145 @@ class Board:
         self.game_log.append(end_square + '=' + desired_promotion)
         self.switch_player()
 
+    def castle(self, K_square, K_end_square, kind):
+        if kind == 'long':
+            R_square = 'a'
+            R_end_square = 'd'
+            move = 'O-O-O'
+        else:
+            R_square = 'h'
+            R_end_square = 'f'
+            move = 'O-O'
+        if self.board[K_square].colour == 'b':
+            temp_number = '8'
+        else:
+            temp_number = '1'
+        R_square += temp_number
+        R_end_square += temp_number
+        self.board[K_end_square] = self.board[K_square]
+        self.board[K_square] = False
+        self.board[R_end_square] = self.board[R_square]
+        self.board[R_square] = False
+        self.game_log.append(move)
+        self.board[K_end_square].move_log.append(move)
+        self.board[R_end_square].move_log.append(move)
+        self.switch_player()
+        return kind.capitalize() + ' Castling'
+
+    def en_passant(self, P_square, P_end_square, direction):
+        if self.board[P_square].colour == 'b':
+            row = '4'
+        else:
+            row = '5'
+        temp_figure = self.board[P_square]
+        taken_figure = self.board[chr(ord(P_square[0]) + int(direction)) + row]
+        self.board[P_end_square] = temp_figure
+        self.board[P_square] = False
+        self.board[chr(ord(P_square[0]) + int(direction)) + row] = False
+        if self.check_if_check((self.find_pieces('K', temp_figure.colour)[0])):
+            self.board[P_square] = temp_figure
+            self.board[P_end_square] = False
+            self.board[chr(ord(P_square[0]) + int(direction)) + row] = taken_figure
+            return False
+        else:
+            temp_figure.move_log.append(P_end_square)
+            self.game_log.append(temp_figure.kind + P_end_square)
+            self.switch_player()
+            return 'En Passant'
+
     def move(self, start_square, end_square):  # preforms the move + castling + promotion + en passant
         temp_figure = self.board[start_square]
         if not temp_figure:
             return False
         elif self.player_to_move != temp_figure.colour:
             return False
+# castling
         elif temp_figure.kind == 'K' and start_square == 'e1' and end_square == 'c1':
             if self.check_for_move('e1', 'd1') and self.check_for_move('e1', 'c1') and not self.check_if_check('e1'):
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board['d1'] = self.board['a1']
-                self.board['a1'] = False
-                self.game_log.append('O-O-O')
-                temp_figure.move_log.append('O-O-O')
-                self.board['d1'].move_log.append('O-O-O')
-                self.switch_player()
-                return True
+                return self.castle(start_square, end_square, 'long')
         elif temp_figure.kind == 'K' and start_square == 'e1' and end_square == 'g1':
             if self.check_for_move('e1', 'f1') and self.check_for_move('e1', 'g1') and not self.check_if_check('e1'):
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board['f1'] = self.board['h1']
-                self.board['h1'] = False
-                self.game_log.append('O-O')
-                temp_figure.move_log.append('O-O')
-                self.board['f1'].move_log.append('O-O')
-                self.switch_player()
-                return True
+                return self.castle(start_square, end_square, 'short')
         elif temp_figure.kind == 'K' and start_square == 'e8' and end_square == 'c8':
             if self.check_for_move('e8', 'd8') and self.check_for_move('e8', 'c8') and not self.check_if_check('e8'):
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board['d8'] = self.board['a8']
-                self.board['a8'] = False
-                self.game_log.append('O-O-O')
-                temp_figure.move_log.append('O-O-O')
-                self.board['d8'].move_log.append('O-O-O')
-                self.switch_player()
-                return True
+                return self.castle(start_square, end_square, 'long')
         elif temp_figure.kind == 'K' and start_square == 'e8' and end_square == 'g8':
             if self.check_for_move('e8', 'f8') and self.check_for_move('e8', 'g8') and not self.check_if_check('e8'):
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board['f8'] = self.board['h8']
-                self.board['h8'] = False
-                self.game_log.append('O-O')
-                temp_figure.move_log.append('O-O')
-                self.board['f8'].move_log.append('O-O')
-                self.switch_player()
-                return True
+                return self.castle(start_square, end_square, 'short')
+# promotion
         elif temp_figure.kind == 'P' and end_square[1] == '8' and temp_figure.colour == 'w' and self.check_for_move(start_square, end_square):
-            return 'Promotion'
+            return 'Black Promotion'
         elif temp_figure.kind == 'P' and end_square[1] == '1' and temp_figure.colour == 'b' and self.check_for_move(start_square, end_square):
-            return 'Promotion'
+            return 'White Promotion'
+# en passant
         elif temp_figure.kind == 'P' and start_square[1] == '5' and temp_figure.colour == 'w' and not self.board[end_square] and (end_square[0] == chr(ord(start_square[0]) + 1) or end_square[0] == chr(ord(start_square[0]) - 1)):
             if self.game_log[-1] == 'P' + chr(ord(start_square[0]) + 1) + '5' and len(self.board[chr(ord(start_square[0]) + 1) + '5'].move_log) == 1:
-                t_fig = self.board[chr(ord(start_square[0]) + 1) + '5']
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board[chr(ord(start_square[0]) + 1) + '5'] = False
-                if self.check_if_check((self.find_pieces('K', temp_figure.colour)[0])):
-                    self.board[start_square] = temp_figure
-                    self.board[end_square] = False
-                    self.board[chr(ord(start_square[0]) + 1) + '5'] = t_fig
-                    return False
-                else:
-                    temp_figure.move_log.append(end_square)
-                    self.game_log.append(temp_figure.kind + end_square)
-                    self.switch_player()
-                    return True
+                return self.en_passant(start_square, end_square, '1')
             if self.game_log[-1] == 'P' + chr(ord(start_square[0]) - 1) + '5' and len(self.board[chr(ord(start_square[0]) - 1) + '5'].move_log) == 1:
-                t_fig = self.board[chr(ord(start_square[0]) - 1) + '5']
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board[chr(ord(start_square[0]) - 1) + '5'] = False
-                if self.check_if_check((self.find_pieces('K', temp_figure.colour)[0])):
-                    self.board[start_square] = temp_figure
-                    self.board[end_square] = False
-                    self.board[chr(ord(start_square[0]) - 1) + '5'] = t_fig
-                    return False
-                else:
-                    temp_figure.move_log.append(end_square)
-                    self.game_log.append(temp_figure.kind + end_square)
-                    self.switch_player()
-                    return True
+                return self.en_passant(start_square, end_square, '-1')
         elif temp_figure.kind == 'P' and start_square[1] == '4' and temp_figure.colour == 'b' and not self.board[end_square] and (end_square[0] == chr(ord(start_square[0]) + 1) or end_square[0] == chr(ord(start_square[0]) - 1)):
             if self.game_log[-1] == 'P' + chr(ord(start_square[0]) + 1) + '4' and len(self.board[chr(ord(start_square[0]) + 1) + '4'].move_log) == 1:
-                t_fig = self.board[chr(ord(start_square[0]) + 1) + '4']
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board[chr(ord(start_square[0]) + 1) + '4'] = False
-                if self.check_if_check((self.find_pieces('K', temp_figure.colour)[0])):
-                    self.board[start_square] = temp_figure
-                    self.board[end_square] = False
-                    self.board[chr(ord(start_square[0]) + 1) + '4'] = t_fig
-                    return False
-                else:
-                    temp_figure.move_log.append(end_square)
-                    self.game_log.append(temp_figure.kind + end_square)
-                    self.switch_player()
-                    return True
+                return self.en_passant(start_square, end_square, '1')
             if self.game_log[-1] == 'P' + chr(ord(start_square[0]) - 1) + '4' and len(self.board[chr(ord(start_square[0]) - 1) + '4'].move_log) == 1:
-                t_fig = self.board[chr(ord(start_square[0]) - 1) + '4']
-                self.board[end_square] = temp_figure
-                self.board[start_square] = False
-                self.board[chr(ord(start_square[0]) - 1) + '4'] = False
-                if self.check_if_check((self.find_pieces('K', temp_figure.colour)[0])):
-                    self.board[start_square] = temp_figure
-                    self.board[end_square] = False
-                    self.board[chr(ord(start_square[0]) - 1) + '4'] = t_fig
-                    return False
-                else:
-                    temp_figure.move_log.append(end_square)
-                    self.game_log.append(temp_figure.kind + end_square)
-                    self.switch_player()
-                    return True
+                return self.en_passant(start_square, end_square, '-1')
+# else
         elif self.check_for_move(start_square, end_square):
             self.board[start_square] = False
             self.board[end_square] = temp_figure
             temp_figure.move_log.append(end_square)
             self.game_log.append(temp_figure.kind + end_square)
             self.switch_player()
-            return True
+            return 'Move'
         else:
             return False
+
+    def start_game(self):
+        for i in self.board:
+            self.board[i] = False
+        self.board['e8'] = Piece('K', 'b', [])
+        self.board['d8'] = Piece('Q', 'b', [])
+        self.board['f8'] = Piece('B', 'b', [])
+        self.board['c8'] = Piece('B', 'b', [])
+        self.board['g8'] = Piece('N', 'b', [])
+        self.board['b8'] = Piece('N', 'b', [])
+        self.board['h8'] = Piece('R', 'b', [])
+        self.board['a8'] = Piece('R', 'b', [])
+        self.board['a7'] = Piece('P', 'b', [])
+        self.board['b7'] = Piece('P', 'b', [])
+        self.board['c7'] = Piece('P', 'b', [])
+        self.board['d7'] = Piece('P', 'b', [])
+        self.board['e7'] = Piece('P', 'b', [])
+        self.board['f7'] = Piece('P', 'b', [])
+        self.board['g7'] = Piece('P', 'b', [])
+        self.board['h7'] = Piece('P', 'b', [])
+
+        self.board['e1'] = Piece('K', 'w', [])
+        self.board['d1'] = Piece('Q', 'w', [])
+        self.board['f1'] = Piece('B', 'w', [])
+        self.board['c1'] = Piece('B', 'w', [])
+        self.board['g1'] = Piece('N', 'w', [])
+        self.board['b1'] = Piece('N', 'w', [])
+        self.board['h1'] = Piece('R', 'w', [])
+        self.board['a1'] = Piece('R', 'w', [])
+        self.board['a2'] = Piece('P', 'w', [])
+        self.board['b2'] = Piece('P', 'w', [])
+        self.board['c2'] = Piece('P', 'w', [])
+        self.board['d2'] = Piece('P', 'w', [])
+        self.board['e2'] = Piece('P', 'w', [])
+        self.board['f2'] = Piece('P', 'w', [])
+        self.board['g2'] = Piece('P', 'w', [])
+        self.board['h2'] = Piece('P', 'w', [])
+        self.game_log = []
+        self.player_to_move = 'w'
 
 
 class Moves:
 
-    playboard_squares = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8',
-                         'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8',
-                         'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8',
-                         'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8',
-                         'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8',
-                         'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8',
-                         'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8',
-                         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
+    def is_on_playboard(self, square):
+        if 0 < ord(square[0]) - 96 < 9 and 0 < int(square[1:]) < 9:
+            return True
+        else:
+            return False
 
     def arbitrary(self, test_square, playboard):
         temp_figure = playboard[test_square]
@@ -222,7 +224,7 @@ class Moves:
             elif temp_figure.kind == 'P':
                 return Moves().P(test_square, playboard)
 
-    def check_if_ok(self, square, test_square, playboard):
+    def check_if_ok(self, square, test_square, playboard):  # does not check if given square is inside playboard
         if not playboard[square]:
             return 1
         elif playboard[square].colour != playboard[test_square].colour:
@@ -230,16 +232,52 @@ class Moves:
         elif playboard[square].colour == playboard[test_square].colour:
             return 3
 
+    def straight_move(self, square, direction, sign, playboard):
+        if direction == 'horizontal':
+            letter_coef = sign
+            number_coef = 0
+        else:
+            letter_coef = 0
+            number_coef = sign
+        i = 1
+        possible_squares = []
+        while self.is_on_playboard(chr(ord(square[0]) + i * letter_coef) + str(int(square[1]) + i * number_coef)):
+            temp_square = chr(ord(square[0]) + i * letter_coef) + str(int(square[1]) + i * number_coef)
+            if self.check_if_ok(temp_square, square, playboard) == 1:
+                possible_squares.append(temp_square)
+                i += 1
+            elif self.check_if_ok(temp_square, square, playboard) == 2:
+                possible_squares.append(temp_square)
+                break
+            else:
+                break
+        return possible_squares
+
+    def diagonal_move(self, square, vertical_sign, horizontal_sign, playboard):
+        possible_squares = []
+        i = 1
+        while self.is_on_playboard(chr(ord(square[0]) + i * horizontal_sign) + str(int(square[1]) + i * vertical_sign)):
+            temp_square = chr(ord(square[0]) + i * horizontal_sign) + str(int(square[1]) + i * vertical_sign)
+            if self.check_if_ok(temp_square, square, playboard) == 1:
+                possible_squares.append(temp_square)
+                i += 1
+            elif self.check_if_ok(temp_square, square, playboard) == 2:
+                possible_squares.append(temp_square)
+                break
+            else:
+                break
+        return possible_squares
+
     def K(self, test_square, playboard):
         possible_squares = []
 
         for i in range(-1, 2):
             for j in range(-1, 2):
                 temp_square = chr(ord(test_square[0]) + j) + str(int(test_square[1]) + i)
-                if temp_square in self.playboard_squares and self.check_if_ok(temp_square, test_square, playboard):
+                if self.is_on_playboard(temp_square) and self.check_if_ok(temp_square, test_square, playboard) in [1, 2]:
                     possible_squares.append(temp_square)
 
-        if playboard[test_square].move_log == []:
+        if playboard[test_square].move_log == []:  # for check_for_move to work - castling
             if playboard[test_square].colour == 'w':
                 if playboard['a1'] and playboard['a1'].kind == 'R' and playboard['a1'].move_log == [] and not playboard['b1'] and not playboard['c1'] and not playboard['d1']:
                     possible_squares.append('c1')
@@ -254,117 +292,20 @@ class Moves:
         return possible_squares
 
     def Q(self, test_square, playboard):
-        possible_squares = []
-
-        possible_squares += self.R(test_square, playboard)
-        possible_squares += self.B(test_square, playboard)
-
-        return possible_squares
+        return self.R(test_square, playboard) + self.B(test_square, playboard)
 
     def R(self, test_square, playboard):
-        possible_squares = []
-
-        i = 1
-        while i + int(test_square[1]) < 9:
-            temp_square = test_square[0] + str(int(test_square[1]) + i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i += 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = -1
-        while i + int(test_square[1]) > 0:
-            temp_square = test_square[0] + str(int(test_square[1]) + i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i -= 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = 1
-        while i + ord(test_square[0]) - 97 < 8:
-            temp_square = chr(ord(test_square[0]) + i) + test_square[1]
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i += 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = -1
-        while i + ord(test_square[0]) - 97 > -1:
-            temp_square = chr(ord(test_square[0]) + i) + test_square[1]
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i -= 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
+        possible_squares = self.straight_move(test_square, 'horizontal', 1, playboard)
+        possible_squares += self.straight_move(test_square, 'horizontal', -1, playboard)
+        possible_squares += self.straight_move(test_square, 'vertical', 1, playboard)
+        possible_squares += self.straight_move(test_square, 'vertical', -1, playboard)
         return possible_squares
 
     def B(self, test_square, playboard):
-        possible_squares = []
-
-        i = 1
-        while i + int(test_square[1]) < 9 and i + ord(test_square[0]) - 97 < 8:
-            temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i += 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = -1
-        while i + int(test_square[1]) > 0 and i + ord(test_square[0]) - 97 > -1:
-            temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i -= 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = 1
-        while i + int(test_square[1]) < 9 and - i + ord(test_square[0]) - 97 > -1:
-            temp_square = chr(ord(test_square[0]) - i) + str(int(test_square[1]) + i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i += 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
-        i = 1
-        while - i + int(test_square[1]) > 0 and i + ord(test_square[0]) - 97 < 8:
-            temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) - i)
-            if self.check_if_ok(temp_square, test_square, playboard) == 1:
-                possible_squares.append(temp_square)
-                i += 1
-            elif self.check_if_ok(temp_square, test_square, playboard) == 2:
-                possible_squares.append(temp_square)
-                break
-            else:
-                break
-
+        possible_squares = self.diagonal_move(test_square, 1, 1, playboard)
+        possible_squares += self.diagonal_move(test_square, 1, -1, playboard)
+        possible_squares += self.diagonal_move(test_square, -1, -1, playboard)
+        possible_squares += self.diagonal_move(test_square, -1, 1, playboard)
         return possible_squares
 
     def N(self, test_square, playboard):
@@ -374,48 +315,32 @@ class Moves:
             for j in [-1, 1]:
                 temp_square1 = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + j)
                 temp_square2 = chr(ord(test_square[0]) + j) + str(int(test_square[1]) + i)
-                if temp_square1 in self.playboard_squares and temp_square1 != test_square:
-                    if not playboard[temp_square1]:
+                if self.is_on_playboard(temp_square1) and temp_square1 != test_square:
+                    if self.check_if_ok(temp_square1, test_square, playboard) in [1, 2]:
                         possible_squares.append(temp_square1)
-                    elif playboard[test_square].colour != playboard[temp_square1].colour:
-                        possible_squares.append(temp_square1)
-                if temp_square2 in self.playboard_squares and temp_square2 != test_square:
-                    if not playboard[temp_square2]:
+                if self.is_on_playboard(temp_square2) and temp_square2 != test_square:
+                    if self.check_if_ok(temp_square2, test_square, playboard) in [1, 2]:
                         possible_squares.append(temp_square2)
-                    elif playboard[test_square].colour != playboard[temp_square2].colour:
-                        possible_squares.append(temp_square2)
-
         return possible_squares
 
-    def P(self, test_square, playboard):
+    def P(self, test_square, playboard):  # en passant and promotion entairely carried out in move
         possible_squares = []
         if playboard[test_square].colour == 'w':
-            temp_square1 = test_square[0] + str(int(test_square[1]) + 1)
-            temp_square2 = test_square[0] + str(int(test_square[1]) + 2)
-            if temp_square1 in self.playboard_squares and not playboard[temp_square1]:
-                possible_squares.append(temp_square1)
-            if temp_square2 in self.playboard_squares and test_square[1] == '2' and not playboard[temp_square2]:
-                possible_squares.append(temp_square2)
-            temp_square1 = chr(ord(test_square[0]) - 1) + str(int(test_square[1]) + 1)
-            temp_square2 = chr(ord(test_square[0]) + 1) + str(int(test_square[1]) + 1)
-            if temp_square1 in self.playboard_squares and playboard[temp_square1] and playboard[temp_square1].colour == 'b':
-                possible_squares.append(temp_square1)
-            if temp_square2 in self.playboard_squares and playboard[temp_square2] and playboard[temp_square2].colour == 'b':
-                possible_squares.append(temp_square2)
+            coef = 1
+            start_line = '2'
         else:
-            temp_square1 = test_square[0] + str(int(test_square[1]) - 1)
-            temp_square2 = test_square[0] + str(int(test_square[1]) - 2)
-            if temp_square1 in self.playboard_squares and not playboard[temp_square1]:
-                possible_squares.append(temp_square1)
-            if temp_square2 in self.playboard_squares and test_square[1] == '7' and not playboard[temp_square2]:
-                possible_squares.append(temp_square2)
-            temp_square1 = chr(ord(test_square[0]) - 1) + str(int(test_square[1]) - 1)
-            temp_square2 = chr(ord(test_square[0]) + 1) + str(int(test_square[1]) - 1)
-            if temp_square1 in self.playboard_squares and playboard[temp_square1] and playboard[temp_square1].colour == 'w':
-                possible_squares.append(temp_square1)
-            if temp_square2 in self.playboard_squares and playboard[temp_square2] and playboard[temp_square2].colour == 'w':
-                possible_squares.append(temp_square2)
-
+            coef = -1
+            start_line = '7'
+        temp_square1 = test_square[0] + str(int(test_square[1]) + 1 * coef)
+        temp_square2 = test_square[0] + str(int(test_square[1]) + 2 * coef)
+        if self.is_on_playboard(temp_square1) and not playboard[temp_square1]:
+            possible_squares.append(temp_square1)
+        if self.is_on_playboard(temp_square2) and test_square[1] == start_line and not playboard[temp_square2] and not playboard[temp_square1]:
+            possible_squares.append(temp_square2)
+        for i in [1, -1]:
+            temp_square = chr(ord(test_square[0]) + i) + str(int(test_square[1]) + 1 * coef)
+            if self.is_on_playboard(temp_square) and playboard[temp_square] and playboard[temp_square].colour != playboard[test_square].colour:
+                possible_squares.append(temp_square)
         return possible_squares
 
 
@@ -427,7 +352,7 @@ class Piece:
         self.possible_squares = possible_squares
         self.move_log = []
 
-    def encode(self):
+    def encode(self):  # utf-8 html for piece (missing &# needed)
         i = 0
         if self.kind == 'K':
             i += 12
@@ -445,12 +370,3 @@ class Piece:
             i += 6
 
         return int('98' + str(i))
-
-gameboard = Board()
-wN = Piece('K', 'b', [])
-gameboard.board['e8'] = wN
-print(Moves().K('e8', gameboard.board))
-bN = Piece('R', 'b', [])
-gameboard.board['h8'] = bN
-gameboard.move('e8', 'g8')
-print(Moves().arbitrary('e8', gameboard.board))
