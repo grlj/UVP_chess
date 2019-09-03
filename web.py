@@ -8,6 +8,9 @@ bottle.TEMPLATE_PATH.insert(0, 'views')
 gameboard = Board()
 gameboard.start_game()
 
+@bottle.route('/static/<filepath:path>')
+def server_static(filepath):
+    return bottle.static_file(filepath, root='C:/Users/janez/Documents/GitHub/UVP_chess/views')
 
 @bottle.get('/')
 def print_board():
@@ -66,7 +69,7 @@ def game_log():
 
 
 @bottle.post('/new_game')
-def game_log():
+def new_game():
     gameboard.start_game()
     bottle.redirect('/')
 
