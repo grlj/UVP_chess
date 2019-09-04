@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import os
 import bottle
 from chess import Board, Moves, Piece
-
-bottle.TEMPLATE_PATH.insert(0, 'views')
 
 gameboard = Board()
 gameboard.start_game()
 
+path = os.path.abspath("views")
+
 @bottle.route('/static/<filepath:path>')
 def server_static(filepath):
-    return bottle.static_file(filepath, root='C:/Users/janez/Documents/GitHub/UVP_chess/views')
+    return bottle.static_file(filepath, root=path)
 
 @bottle.get('/')
 def print_board():
